@@ -1,0 +1,6 @@
+2021-12-01 17:48:35.102 -05:00 [INF] Loaded 3 extensions
+2021-12-01 17:48:35.994 -05:00 [INF] MSBuild registered from C:\Program Files\dotnet\sdk\5.0.403\
+2021-12-01 17:48:43.253 -05:00 [INF] Initializing upgrade step Select an entrypoint
+2021-12-01 17:48:43.255 -05:00 [INF] Setting entrypoint to user selected project: C:\Dev\AutoUpdater.NET\AutoUpdaterTest\AutoUpdaterTest.csproj
+2021-12-01 17:48:43.258 -05:00 [INF] Initializing upgrade step Select project to upgrade
+2021-12-01 17:48:43.298 -05:00 [INF] Initializing upgrade step Back up project

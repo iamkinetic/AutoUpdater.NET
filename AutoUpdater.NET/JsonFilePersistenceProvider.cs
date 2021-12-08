@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Semver;
+using System;
 using System.IO;
 using System.Runtime.Serialization;
 using System.Runtime.Serialization.Json;
@@ -75,7 +76,7 @@ namespace AutoUpdaterDotNET
         }
 
         /// <inheritdoc />
-        public Version GetSkippedVersion()
+        public SemVersion GetSkippedVersion()
         {
             return PersistedValues.SkippedVersion;
         }
@@ -87,7 +88,7 @@ namespace AutoUpdaterDotNET
         }
 
         /// <inheritdoc />
-        public void SetSkippedVersion(Version version)
+        public void SetSkippedVersion(SemVersion version)
         {
             PersistedValues.SkippedVersion = version;
             Save();
@@ -112,7 +113,7 @@ namespace AutoUpdaterDotNET
         /// </summary>
         /// <remarks>The SetSkippedVersion function sets this property and calls the Save() method for making changes permanent.</remarks>
         [DataMember]
-        public Version SkippedVersion { get; set; }
+        public SemVersion SkippedVersion { get; set; }
 
         /// <summary>
         /// Date and time at which the user must be given again the possibility to upgrade the application.

@@ -12,6 +12,7 @@ using System.Windows.Forms;
 using System.Xml;
 using System.Xml.Serialization;
 using AutoUpdaterDotNET.Properties;
+using Semver;
 
 namespace AutoUpdaterDotNET
 {
@@ -73,7 +74,7 @@ namespace AutoUpdaterDotNET
         /// <summary>
         ///     You can set this field to your current version if you don't want to determine the version from the assembly.
         /// </summary>
-        public static Version InstalledVersion;
+        public static SemVersion InstalledVersion;
 
         /// <summary>
         ///     Set it to folder path where you want to download the update file. If not provided then it defaults to Temp folder.
@@ -357,7 +358,7 @@ namespace AutoUpdaterDotNET
             using (MyWebClient client = GetWebClient(BaseUri, BasicAuthXML))
             {
                 string xml = client.DownloadString(BaseUri);
-                
+                 
                 if (ParseUpdateInfoEvent == null)
                 {
                     XmlSerializer xmlSerializer = new XmlSerializer(typeof(UpdateInfoEventArgs));
@@ -372,18 +373,18 @@ namespace AutoUpdaterDotNET
                 }
             }
 
-            if (string.IsNullOrEmpty(args?.CurrentVersion) || string.IsNullOrEmpty(args.DownloadURL))
+            if (string.IsNullOrWhiteSpace(args?.CurrentVersion) || string.IsNullOrEmpty(args.DownloadURL))
             {
                 throw new MissingFieldException();
             }
 
-            args.InstalledVersion = InstalledVersion != null ? InstalledVersion : mainAssembly.GetName().Version;
-            args.IsUpdateAvailable = new Version(args.CurrentVersion) > args.InstalledVersion;
+            args.InstalledVersion = InstalledVersion != null ? InstalledVersion.ToString() : mainAssembly.GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion;
+            args.IsUpdateAvailable = SemVersion.Parse(args.InstalledVersion).IsOlderThan(args.CurrentVersion);
 
             if (!Mandatory)
             {
                 if (string.IsNullOrEmpty(args.Mandatory.MinimumVersion) ||
-                    args.InstalledVersion < new Version(args.Mandatory.MinimumVersion))
+                    args.IsUpdateAvailable)
                 {
                     Mandatory = args.Mandatory.Value;
                     UpdateMode = args.Mandatory.UpdateMode;
@@ -402,11 +403,11 @@ namespace AutoUpdaterDotNET
                 var skippedVersion = PersistenceProvider.GetSkippedVersion();
                 if (skippedVersion != null)
                 {
-                    var currentVersion = new Version(args.CurrentVersion);
-                    if (currentVersion <= skippedVersion)
+                    var currentVersion = SemVersion.Parse(args.CurrentVersion);
+                    if (currentVersion.IsOlderOrEqualTo(skippedVersion))
                         return null;
 
-                    if (currentVersion > skippedVersion)
+                    if (currentVersion.IsNewerThan(skippedVersion))
                     {
                         // Update the persisted state. Its no longer makes sense to have this flag set as we are working on a newer application version.
                         PersistenceProvider.SetSkippedVersion(null);

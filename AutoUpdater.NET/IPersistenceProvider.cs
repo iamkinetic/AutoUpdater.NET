@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Semver;
+using System;
 
 namespace AutoUpdaterDotNET
 {
@@ -11,7 +12,7 @@ namespace AutoUpdaterDotNET
         /// Reads the flag indicating whether a specific version should be skipped or not.
         /// </summary>
         /// <returns>Returns a version to skip. If skip value is false or not present then it will return null.</returns>
-        Version GetSkippedVersion();
+        SemVersion GetSkippedVersion();
 
         /// <summary>
         /// Reads the value containing the date and time at which the user must be given again the possibility to upgrade the application.
@@ -23,7 +24,7 @@ namespace AutoUpdaterDotNET
         /// Sets the values indicating the specific version that must be ignored by AutoUpdater.
         /// </summary>
         /// <param name="version">Version code for the specific version that must be ignored. Set it to null if you don't want to skip any version.</param>
-        void SetSkippedVersion(Version version);
+        void SetSkippedVersion(SemVersion version);
 
         /// <summary>
         /// Sets the date and time at which the user must be given again the possibility to upgrade the application.

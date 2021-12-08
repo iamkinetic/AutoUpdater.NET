@@ -1,0 +1,12 @@
+{
+  "runtimeOptions": {
+    "additionalProbingPaths": [
+      "C:\\Users\\frederic.catellier\\.dotnet\\store\\|arch|\\|tfm|",
+      "C:\\Users\\frederic.catellier\\.nuget\\packages",
+      "C:\\Program Files (x86)\\DevExpress 21.1\\Components\\Offline Packages",
+      "C:\\Program Files (x86)\\DevExpress 21.2\\Components\\Offline Packages",
+      "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages",
+      "C:\\Program Files\\dotnet\\sdk\\NuGetFallbackFolder"
+    ]
+  }
+}

@@ -124,7 +124,7 @@ namespace AutoUpdaterDotNET
 
         private void ButtonSkipClick(object sender, EventArgs e)
         {
-            AutoUpdater.PersistenceProvider.SetSkippedVersion(new Version(_args.CurrentVersion));
+            AutoUpdater.PersistenceProvider.SetSkippedVersion(_args.CurrentVersion);
         }
 
         private void ButtonRemindLaterClick(object sender, EventArgs e)

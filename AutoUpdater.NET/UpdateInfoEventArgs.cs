@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Semver;
+using System;
 using System.Xml.Serialization;
 
 namespace AutoUpdaterDotNET
@@ -58,7 +59,7 @@ namespace AutoUpdaterDotNET
         /// <summary>
         ///     Returns version of the application currently installed on the user's PC.
         /// </summary>
-        public Version InstalledVersion { get; set; }
+        public string InstalledVersion { get; set; }
 
         /// <summary>
         ///     Shows if the update is required or optional.

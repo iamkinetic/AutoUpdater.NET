@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Globalization;
 using Microsoft.Win32;
+using Semver;
 
 namespace AutoUpdaterDotNET
 {
@@ -28,7 +29,7 @@ namespace AutoUpdaterDotNET
         }
 
         /// <inheritdoc />
-        public Version GetSkippedVersion()
+        public SemVersion GetSkippedVersion()
         {
             try
             {
@@ -38,7 +39,7 @@ namespace AutoUpdaterDotNET
 
                     if (skippedVersionValue != null)
                     {
-                        return new Version(skippedVersionValue.ToString());
+                        return SemVersion.Parse(skippedVersionValue.ToString());
                     }
                 }
             }
@@ -69,7 +70,7 @@ namespace AutoUpdaterDotNET
         }
 
         /// <inheritdoc />
-        public void SetSkippedVersion(Version version)
+        public void SetSkippedVersion(SemVersion version)
         {
             using (RegistryKey autoUpdaterKey = Registry.CurrentUser.CreateSubKey(RegistryLocation))
             {
