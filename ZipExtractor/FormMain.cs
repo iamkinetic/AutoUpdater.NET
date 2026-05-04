@@ -42,6 +42,17 @@ namespace ZipExtractor
             {
                 string executablePath = args[3];
 
+                var clearAppDirectory = args.Length > 4 && args[4].Equals("true", StringComparison.OrdinalIgnoreCase);
+
+                var clearAppDirectoryIgnoreList = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+                if (args.Length > 5 && !string.IsNullOrEmpty(args[5]))
+                {
+                    foreach (var entry in args[5].Split('|'))
+                    {
+                        clearAppDirectoryIgnoreList.Add(entry.Trim());
+                    }
+                }
+
                 // Extract all the files.
                 _backgroundWorker = new BackgroundWorker
                 {
@@ -81,6 +92,41 @@ namespace ZipExtractor
                     {
                         path += Path.DirectorySeparatorChar;
                     }
+
+                    if (clearAppDirectory)
+                    {
+                        _logBuilder.AppendLine("Clearing application directory...");
+                        _backgroundWorker.ReportProgress(0, "Clearing application directory...");
+
+                        foreach (var file in Directory.GetFiles(path))
+                        {
+                            var fileName = Path.GetFileName(file);
+                            if (!clearAppDirectoryIgnoreList.Contains(fileName))
+                            {
+                                File.Delete(file);
+                                _logBuilder.AppendLine($"Deleted file: {file}");
+                            }
+                            else
+                            {
+                                _logBuilder.AppendLine($"Skipped (ignored): {file}");
+                            }
+                        }
+
+                        foreach (var directory in Directory.GetDirectories(path))
+                        {
+                            var dirName = Path.GetFileName(directory);
+                            if (!clearAppDirectoryIgnoreList.Contains(dirName))
+                            {
+                                Directory.Delete(directory, true);
+                                _logBuilder.AppendLine($"Deleted directory: {directory}");
+                            }
+                            else
+                            {
+                                _logBuilder.AppendLine($"Skipped (ignored): {directory}");
+                            }
+                        }
+                    }
+
                     var archive = ZipFile.OpenRead(args[1]);
                     
                     var entries = archive.Entries;
@@ -212,9 +258,9 @@ namespace ZipExtractor
                             try
                             {
                                 ProcessStartInfo processStartInfo = new ProcessStartInfo(executablePath);
-                                if (args.Length > 4)
+                                if (args.Length > 6)
                                 {
-                                    processStartInfo.Arguments = args[4];
+                                    processStartInfo.Arguments = args[6];
                                 }
 
                                 Process.Start(processStartInfo);

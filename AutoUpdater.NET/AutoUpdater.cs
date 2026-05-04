@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Drawing;
@@ -87,7 +88,18 @@ namespace AutoUpdaterDotNET
         public static string InstallationPath;
 
         /// <summary>
-        ///     Set the Application Title shown in Update dialog. Although AutoUpdater.NET will get it automatically, you can set this property if you like to give custom Title.
+        ///     Set this to true if you want to delete all files in the application directory before extracting the zip file.
+        /// </summary>
+        public static bool ClearAppDirectory = false;
+
+        /// <summary>
+        ///     List of file and folder names (relative to the installation directory) to preserve when ClearAppDirectory is enabled.
+        ///     These entries will not be deleted before the zip file is extracted.
+        /// </summary>
+        public static IList<string> ClearAppDirectoryIgnoreList = new List<string>();
+
+        /// <summary>
+        ///     Set the Application Title shown in Update dialog.Although AutoUpdater.NET will get it automatically, you can set this property if you like to give custom Title.
         /// </summary>
         public static string AppTitle;
 

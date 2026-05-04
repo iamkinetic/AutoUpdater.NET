@@ -155,6 +155,15 @@ namespace AutoUpdaterDotNET
 
                     StringBuilder arguments =
                         new StringBuilder($"\"{tempPath}\" \"{extractionPath}\" \"{executablePath}\"");
+
+                    // Insert new args at positions [4] and [5]
+                    arguments.Append($" \"{(AutoUpdater.ClearAppDirectory ? "true" : "false")}\"");
+                    var ignoreEntries = AutoUpdater.ClearAppDirectoryIgnoreList != null && AutoUpdater.ClearAppDirectoryIgnoreList.Count > 0
+                        ? string.Join("|", AutoUpdater.ClearAppDirectoryIgnoreList)
+                        : string.Empty;
+                    arguments.Append($" \"{ignoreEntries}\"");
+
+                    // App args are now at position [6] instead of [4]
                     string[] args = Environment.GetCommandLineArgs();
                     for (int i = 1; i < args.Length; i++)
                     {
