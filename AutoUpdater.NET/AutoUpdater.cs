@@ -99,6 +99,12 @@ namespace AutoUpdaterDotNET
         public static IList<string> ClearAppDirectoryIgnoreList = new List<string>();
 
         /// <summary>
+        ///     Full path to the log file where ZipExtractor will write its extraction log.
+        ///     If not set, ZipExtractor writes to a ZipExtractor.log file in its own base directory.
+        /// </summary>
+        public static string ZipExtractorLogPath { get; set; }
+
+        /// <summary>
         ///     Set the Application Title shown in Update dialog.Although AutoUpdater.NET will get it automatically, you can set this property if you like to give custom Title.
         /// </summary>
         public static string AppTitle;
@@ -567,7 +573,7 @@ namespace AutoUpdaterDotNET
             {
                 if (_isWinFormsApplication)
                 {
-                    MethodInvoker methodInvoker = Application.Exit;
+                    System.Windows.Forms.MethodInvoker methodInvoker = Application.Exit;
                     methodInvoker.Invoke();
                 }
                 else if (System.Windows.Application.Current != null)

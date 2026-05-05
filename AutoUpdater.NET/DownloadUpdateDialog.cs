@@ -176,6 +176,9 @@ namespace AutoUpdaterDotNET
                         arguments.Append(i.Equals(args.Length - 1) ? "\"" : " ");
                     }
 
+                    // args[7] = log file path (empty string if not set)
+                    arguments.Append($" \"{AutoUpdater.ZipExtractorLogPath ?? string.Empty}\"");
+
                     processStartInfo = new ProcessStartInfo
                     {
                         FileName = installerPath,

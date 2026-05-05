@@ -1,13 +1,13 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFramework>netcoreapp3.1</TargetFramework>
+    <TargetFramework>net10.0-windows</TargetFramework>
     <Platform Condition=" '$(Platform)' == '' ">x86</Platform>
     <OutputType>WinExe</OutputType>
     <UseWindowsForms>true</UseWindowsForms>
-    <ImportWindowsDesktopTargets>true</ImportWindowsDesktopTargets>
-    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
 	<Version>1.2.3-beta4</Version>
 	<GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+	<SupportedOSPlatformVersion>7.0</SupportedOSPlatformVersion>
+	<ApplicationHighDpiMode>SystemAware</ApplicationHighDpiMode>
   </PropertyGroup>
 
 	
@@ -17,12 +17,9 @@
 	
   <ItemGroup>
     <ProjectReference Include="..\AutoUpdater.NET\AutoUpdater.NET.csproj" />
+    <ProjectReference Include="..\ZipExtractor\ZipExtractor.csproj" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="Microsoft.CSharp" Version="4.7.0" />
-    <PackageReference Include="Newtonsoft.Json" Version="12.0.3" />
-    <PackageReference Include="Microsoft.DotNet.UpgradeAssistant.Extensions.Default.Analyzers" Version="0.3.256001">
-      <PrivateAssets>all</PrivateAssets>
-    </PackageReference>
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
   </ItemGroup>
 </Project>
