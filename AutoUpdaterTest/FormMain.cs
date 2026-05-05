@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Net;
@@ -123,8 +124,6 @@ namespace AutoUpdaterTest
 
             //Uncomment following line if you don't want the library to determine the installed version from assembly.
             //AutoUpdater.InstalledVersion = new Version("2.0.0.1");
-
-            AutoUpdater.Start("https://rbsoft.org/updates/AutoUpdaterTest.xml");
         }
 
         private void AutoUpdater_ApplicationExitEvent()
@@ -242,6 +241,96 @@ namespace AutoUpdaterTest
 
             AutoUpdater.Mandatory = true;
             AutoUpdater.Start("https://rbsoft.org/updates/AutoUpdaterTest.xml");
+        }
+
+        private void ButtonTestClearAppDirectory_Click(object sender, EventArgs e)
+        {
+            var testDir = Path.Combine(Path.GetTempPath(), "AutoUpdaterTest_ClearTest_" + Guid.NewGuid().ToString("N"));
+            var zipPath = Path.Combine(Path.GetTempPath(), "AutoUpdaterTest_Update_" + Guid.NewGuid().ToString("N") + ".zip");
+
+            try
+            {
+                // Populate the fake installation directory
+                Directory.CreateDirectory(testDir);
+                File.WriteAllText(Path.Combine(testDir, "OldFile1.txt"), "This file should be deleted");
+                File.WriteAllText(Path.Combine(testDir, "OldFile2.txt"), "This file should also be deleted");
+                File.WriteAllText(Path.Combine(testDir, "config.json"), "This file should be PRESERVED");
+                File.WriteAllText(Path.Combine(testDir, "user-data.db"), "This file should also be PRESERVED");
+                var subDir = Path.Combine(testDir, "OldSubDir");
+                Directory.CreateDirectory(subDir);
+                File.WriteAllText(Path.Combine(subDir, "nested.txt"), "This folder should be deleted");
+                var preservedDir = Path.Combine(testDir, "UserData");
+                Directory.CreateDirectory(preservedDir);
+                File.WriteAllText(Path.Combine(preservedDir, "profile.json"), "This folder should be PRESERVED");
+
+                // Build source directory for the zip
+                var sourceDir = CreateUpdateSourceDirectory();
+                System.IO.Compression.ZipFile.CreateFromDirectory(sourceDir, zipPath);
+
+                var restartTarget = Path.Combine(testDir, "AutoUpdaterTest.exe");
+                var ignoreList = new[] { "config.json", "user-data.db", "UserData" };
+                var testLogPath = Path.Combine("C:\\DEV", "ZipExtractor.log");
+
+                MessageBox.Show(
+                    $"Test directory:\n{testDir}\n\n" +
+                    "Before update:\n" +
+                    "  OldFile1.txt → DELETED\n" +
+                    "  OldFile2.txt → DELETED\n" +
+                    "  config.json → PRESERVED\n" +
+                    "  user-data.db → PRESERVED\n" +
+                    "  OldSubDir\\ → DELETED\n" +
+                    "  UserData\\ → PRESERVED\n\n" +
+                    "After update:\n" +
+                    "  NewFile1.txt (from zip)\n" +
+                    "  NewFile2.txt (from zip)\n\n" +
+                    "ZipExtractor will run in-process. You can set breakpoints in ZipExtractor/FormMain.cs.",
+                    "ClearAppDirectory Test",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Information);
+
+                using var form = new ZipExtractor.FormMain(
+                    zipFilePath: zipPath,
+                    extractionPath: testDir,
+                    executablePath: restartTarget,
+                    clearAppDirectory: true,
+                    clearAppDirectoryIgnoreList: ignoreList,
+                    logFilePath: testLogPath,
+                    exitOnComplete: false);
+
+                form.ShowDialog(this);
+
+                MessageBox.Show(
+                    $"Done! Check the test directory:\n{testDir}\n\nLog file:\n{testLogPath}",
+                    "ClearAppDirectory Test",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Information);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message, ex.GetType().ToString(), MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+            finally
+            {
+                if (File.Exists(zipPath))
+                {
+                    File.Delete(zipPath);
+                }
+            }
+        }
+
+        private string CreateUpdateSourceDirectory()
+        {
+            var sourceDir = Path.Combine(Path.GetTempPath(), "AutoUpdaterTest_UpdateSource_" + Guid.NewGuid().ToString("N"));
+            Directory.CreateDirectory(sourceDir);
+            File.WriteAllText(Path.Combine(sourceDir, "NewFile1.txt"), "This is a new file from the update");
+            File.WriteAllText(Path.Combine(sourceDir, "NewFile2.txt"), "Another new file from the update");
+            // Include a copy of the current exe as the restart target so ZipExtractor can relaunch it
+            var currentExe = Process.GetCurrentProcess().MainModule?.FileName;
+            if (!string.IsNullOrEmpty(currentExe))
+            {
+                File.Copy(currentExe, Path.Combine(sourceDir, "AutoUpdaterTest.exe"), overwrite: true);
+            }
+            return sourceDir;
         }
     }
 }

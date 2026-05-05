@@ -29,6 +29,7 @@
         private void InitializeComponent()
         {
             this.buttonCheckForUpdate = new System.Windows.Forms.Button();
+            this.buttonTestClearAppDirectory = new System.Windows.Forms.Button();
             this.labelVersion = new System.Windows.Forms.Label();
             this.SuspendLayout();
             // 
@@ -45,6 +46,19 @@
             this.buttonCheckForUpdate.UseVisualStyleBackColor = true;
             this.buttonCheckForUpdate.Click += new System.EventHandler(this.ButtonCheckForUpdate_Click);
             // 
+            // buttonTestClearAppDirectory
+            // 
+            this.buttonTestClearAppDirectory.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.buttonTestClearAppDirectory.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.buttonTestClearAppDirectory.Location = new System.Drawing.Point(12, 103);
+            this.buttonTestClearAppDirectory.Name = "buttonTestClearAppDirectory";
+            this.buttonTestClearAppDirectory.Size = new System.Drawing.Size(196, 40);
+            this.buttonTestClearAppDirectory.TabIndex = 2;
+            this.buttonTestClearAppDirectory.Text = "Test ClearAppDirectory";
+            this.buttonTestClearAppDirectory.UseVisualStyleBackColor = true;
+            this.buttonTestClearAppDirectory.Click += new System.EventHandler(this.ButtonTestClearAppDirectory_Click);
+            // 
             // labelVersion
             // 
             this.labelVersion.AutoSize = true;
@@ -59,9 +73,10 @@
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(220, 106);
+            this.ClientSize = new System.Drawing.Size(220, 155);
             this.Controls.Add(this.labelVersion);
             this.Controls.Add(this.buttonCheckForUpdate);
+            this.Controls.Add(this.buttonTestClearAppDirectory);
             this.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog;
             this.MaximizeBox = false;
@@ -79,5 +94,6 @@
 
         private System.Windows.Forms.Button buttonCheckForUpdate;
         private System.Windows.Forms.Label labelVersion;
+        private System.Windows.Forms.Button buttonTestClearAppDirectory;
     }
 }

@@ -1,9 +1,9 @@
-﻿<Project Sdk="Microsoft.NET.Sdk.WindowsDesktop">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
         <ProjectGuid>{FB9E7E6B-B19F-4F37-A708-2996190CEF13}</ProjectGuid>
         <OutputType>library</OutputType>
-        <TargetFrameworks>net45;netcoreapp3.1;net5.0-windows</TargetFrameworks>
+        <TargetFramework>net10.0-windows</TargetFramework>
         <UseWindowsForms>true</UseWindowsForms>
         <UseWpf>true</UseWpf>
         <RootNamespace>AutoUpdaterDotNET</RootNamespace>
@@ -11,14 +11,14 @@
         <Company>RBSoft &amp; Cauca</Company>
         <Product>Cauca.AutoUpdater</Product>
         <Copyright>Copyright © 2012-2021 RBSoft</Copyright>
-        <Version>1.7.1-beta1</Version>
-        <AssemblyVersion>1.7.1.0</AssemblyVersion>
-        <FileVersion>1.7.1.0</FileVersion>
+        <Version>1.7.2</Version>
+        <AssemblyVersion>1.7.2.0</AssemblyVersion>
+        <FileVersion>1.7.2.0</FileVersion>
+        <PackageVersion>1.7.2</PackageVersion>
         <NeutralLanguage>en</NeutralLanguage>
         <PackageId>Cauca.AutoUpdater</PackageId>
         <IncludeSymbols>true</IncludeSymbols>
         <PackageLicenseExpression>MIT</PackageLicenseExpression>
-        <PackageVersion>1.7.1</PackageVersion>
         <Title>AutoUpdater.NET</Title>
         <Authors>rbsoft</Authors>
         <Description>Fully based on AutoUpdater.Net</Description>
@@ -26,31 +26,22 @@
         <PackageTags>autoupdate updater c# vb wpf winforms</PackageTags>
         <PackageReleaseNotes>https://github.com/ravibpatel/AutoUpdater.NET/releases</PackageReleaseNotes>
         <PackageOutputPath>build</PackageOutputPath>
-        <DocumentationFile>$(OutputPath)\$(Configuration)\AutoUpdater.NET.xml</DocumentationFile>
-        <LangVersion>default</LangVersion>
     </PropertyGroup>
     <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
         <OutputPath>build\lib</OutputPath>
         <DebugType>pdbonly</DebugType>
+        <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+        <DocumentationFile>build\lib\AutoUpdater.NET.xml</DocumentationFile>
     </PropertyGroup>
     <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
         <DebugType>full</DebugType>
     </PropertyGroup>
-    <ItemGroup Condition=" '$(TargetFramework)' == 'net45' ">
-        <Reference Include="System" />
-        <Reference Include="System.Data" />
-        <Reference Include="System.Drawing" />
-        <Reference Include="System.Windows.Forms" />
-        <Reference Include="System.Xml" />
-        <Reference Include="WindowsBase" />
-        <Reference Include="PresentationFramework" />
-        <Reference Include="System.Xaml" />
-        <Reference Include="System.Runtime.Serialization" />
-        <PackageReference Include="Resource.Embedder" Version="1.2.8">
-            <PrivateAssets>all</PrivateAssets>
-        </PackageReference>
-    </ItemGroup>
     <ItemGroup>
-      <PackageReference Include="semver" Version="2.0.6" />
+      <PackageReference Include="semver" Version="2.3.0" />
     </ItemGroup>
+
+    <Target Name="PublishZipExtractor" BeforeTargets="BeforeBuild" Condition=" '$(Configuration)' == 'Release' ">
+        <Message Text="Publishing ZipExtractor to Resources..." Importance="High" />
+        <Exec Command="dotnet publish &quot;$(MSBuildThisFileDirectory)..\ZipExtractor\ZipExtractor.csproj&quot; --configuration Release --framework net10.0-windows -r win-x86 /p:SelfContained=false /p:PublishSingleFile=true /p:IncludeNativeLibrariesForSelfExtract=true --output &quot;$(MSBuildThisFileDirectory)Resources&quot;" />
+    </Target>
 </Project>
