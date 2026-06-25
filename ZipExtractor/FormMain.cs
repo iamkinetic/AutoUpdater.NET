@@ -135,8 +135,15 @@ namespace ZipExtractor
                         var fileName = Path.GetFileName(file);
                         if (!_clearAppDirectoryIgnoreList.Contains(fileName))
                         {
-                            File.Delete(file);
-                            _logBuilder.AppendLine($"Deleted file: {file}");
+                            try
+                            {
+                                File.Delete(file);
+                                _logBuilder.AppendLine($"Deleted file: {file}");
+                            }
+                            catch (UnauthorizedAccessException)
+                            {
+                                _logBuilder.AppendLine($"Skipped (access denied): {file}");
+                            }
                         }
                         else
                         {
@@ -149,8 +156,15 @@ namespace ZipExtractor
                         var dirName = Path.GetFileName(directory);
                         if (!_clearAppDirectoryIgnoreList.Contains(dirName))
                         {
-                            Directory.Delete(directory, true);
-                            _logBuilder.AppendLine($"Deleted directory: {directory}");
+                            try
+                            {
+                                Directory.Delete(directory, true);
+                                _logBuilder.AppendLine($"Deleted directory: {directory}");
+                            }
+                            catch (UnauthorizedAccessException)
+                            {
+                                _logBuilder.AppendLine($"Skipped (access denied): {directory}");
+                            }
                         }
                         else
                         {
