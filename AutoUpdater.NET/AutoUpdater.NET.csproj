@@ -11,10 +11,10 @@
         <Company>RBSoft &amp; Cauca</Company>
         <Product>Cauca.AutoUpdater</Product>
         <Copyright>Copyright © 2012-2021 RBSoft</Copyright>
-        <Version>1.7.4</Version>
-        <AssemblyVersion>1.7.4.0</AssemblyVersion>
-        <FileVersion>1.7.4.0</FileVersion>
-        <PackageVersion>1.7.4</PackageVersion>
+        <Version>1.7.6</Version>
+        <AssemblyVersion>1.7.6.0</AssemblyVersion>
+        <FileVersion>1.7.6.0</FileVersion>
+        <PackageVersion>1.7.6</PackageVersion>
         <NeutralLanguage>en</NeutralLanguage>
         <PackageId>Cauca.AutoUpdater</PackageId>
         <IncludeSymbols>true</IncludeSymbols>
