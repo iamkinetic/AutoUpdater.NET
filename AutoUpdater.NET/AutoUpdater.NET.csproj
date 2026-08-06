@@ -3,7 +3,7 @@
     <PropertyGroup>
         <ProjectGuid>{FB9E7E6B-B19F-4F37-A708-2996190CEF13}</ProjectGuid>
         <OutputType>library</OutputType>
-        <TargetFramework>net10.0-windows</TargetFramework>
+        <TargetFrameworks>net9.0-windows;net10.0-windows</TargetFrameworks>
         <UseWindowsForms>true</UseWindowsForms>
         <UseWpf>true</UseWpf>
         <RootNamespace>AutoUpdaterDotNET</RootNamespace>
@@ -11,10 +11,10 @@
         <Company>RBSoft &amp; Cauca</Company>
         <Product>Cauca.AutoUpdater</Product>
         <Copyright>Copyright © 2012-2021 RBSoft</Copyright>
-        <Version>1.7.2</Version>
-        <AssemblyVersion>1.7.2.0</AssemblyVersion>
-        <FileVersion>1.7.2.0</FileVersion>
-        <PackageVersion>1.7.2</PackageVersion>
+        <Version>1.7.4</Version>
+        <AssemblyVersion>1.7.4.0</AssemblyVersion>
+        <FileVersion>1.7.4.0</FileVersion>
+        <PackageVersion>1.7.4</PackageVersion>
         <NeutralLanguage>en</NeutralLanguage>
         <PackageId>Cauca.AutoUpdater</PackageId>
         <IncludeSymbols>true</IncludeSymbols>
@@ -42,6 +42,6 @@
 
     <Target Name="PublishZipExtractor" BeforeTargets="BeforeBuild" Condition=" '$(Configuration)' == 'Release' ">
         <Message Text="Publishing ZipExtractor to Resources..." Importance="High" />
-        <Exec Command="dotnet publish &quot;$(MSBuildThisFileDirectory)..\ZipExtractor\ZipExtractor.csproj&quot; --configuration Release --framework net10.0-windows -r win-x86 /p:SelfContained=false /p:PublishSingleFile=true /p:IncludeNativeLibrariesForSelfExtract=true --output &quot;$(MSBuildThisFileDirectory)Resources&quot;" />
+        <Exec Command="dotnet publish &quot;$(MSBuildThisFileDirectory)..\ZipExtractor\ZipExtractor.csproj&quot; --configuration Release --framework $(TargetFramework) -r win-x86 /p:SelfContained=false /p:PublishSingleFile=true /p:IncludeNativeLibrariesForSelfExtract=true --output &quot;$(MSBuildThisFileDirectory)Resources&quot;" />
     </Target>
 </Project>
