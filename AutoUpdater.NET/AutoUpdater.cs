@@ -99,6 +99,28 @@ namespace AutoUpdaterDotNET
         public static IList<string> ClearAppDirectoryIgnoreList = new List<string>();
 
         /// <summary>
+        ///     Wildcard patterns matched against file names to preserve when ClearAppDirectory is enabled. Supports * and ?
+        ///     and is matched case insensitively, unlike ClearAppDirectoryIgnoreList which matches exact names.
+        ///     Defaults to preserving executables and the .NET host configuration files that sit next to them.
+        /// </summary>
+        public static IList<string> ClearAppDirectoryProtectedPatterns =
+            new List<string> { "*.exe", "*.runtimeconfig.json", "*.deps.json" };
+
+        /// <summary>
+        ///     Set this to true to let ZipExtractor close the application by force when it fails to exit on its own before
+        ///     the update starts. ZipExtractor first waits for ForceCloseTimeout, then asks the main window to close, and
+        ///     kills the process as a last resort. When false, an application that is still running aborts the update
+        ///     instead, leaving the installation directory untouched.
+        /// </summary>
+        public static bool ForceCloseApplication = false;
+
+        /// <summary>
+        ///     How long ZipExtractor waits for the application to exit on its own before it either forces it to close or
+        ///     aborts the update, depending on ForceCloseApplication.
+        /// </summary>
+        public static TimeSpan ForceCloseTimeout = TimeSpan.FromSeconds(10);
+
+        /// <summary>
         ///     Full path to the log file where ZipExtractor will write its extraction log.
         ///     If not set, ZipExtractor writes to a ZipExtractor.log file in its own base directory.
         /// </summary>

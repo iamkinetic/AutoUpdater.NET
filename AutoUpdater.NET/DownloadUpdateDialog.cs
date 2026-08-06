@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Globalization;
@@ -153,37 +154,11 @@ namespace AutoUpdaterDotNET
                         extractionPath = AutoUpdater.InstallationPath;
                     }
 
-                    StringBuilder arguments =
-                        new StringBuilder($"\"{tempPath}\" \"{extractionPath}\" \"{executablePath}\"");
-
-                    // Insert new args at positions [4] and [5]
-                    arguments.Append($" \"{(AutoUpdater.ClearAppDirectory ? "true" : "false")}\"");
-                    var ignoreEntries = AutoUpdater.ClearAppDirectoryIgnoreList != null && AutoUpdater.ClearAppDirectoryIgnoreList.Count > 0
-                        ? string.Join("|", AutoUpdater.ClearAppDirectoryIgnoreList)
-                        : string.Empty;
-                    arguments.Append($" \"{ignoreEntries}\"");
-
-                    // App args are now at position [6] instead of [4]
-                    string[] args = Environment.GetCommandLineArgs();
-                    for (int i = 1; i < args.Length; i++)
-                    {
-                        if (i.Equals(1))
-                        {
-                            arguments.Append(" \"");
-                        }
-
-                        arguments.Append(args[i]);
-                        arguments.Append(i.Equals(args.Length - 1) ? "\"" : " ");
-                    }
-
-                    // args[7] = log file path (empty string if not set)
-                    arguments.Append($" \"{AutoUpdater.ZipExtractorLogPath ?? string.Empty}\"");
-
                     processStartInfo = new ProcessStartInfo
                     {
                         FileName = installerPath,
                         UseShellExecute = true,
-                        Arguments = arguments.ToString()
+                        Arguments = BuildZipExtractorArguments(tempPath, extractionPath, executablePath)
                     };
                 }
                 else if (extension.Equals(".msi", StringComparison.OrdinalIgnoreCase))
@@ -231,6 +206,102 @@ namespace AutoUpdaterDotNET
                 FormClosing -= DownloadUpdateDialog_FormClosing;
                 Close();
             }
+        }
+
+        private static string BuildZipExtractorArguments(string zipPath, string extractionPath, string executablePath)
+        {
+            var arguments = new StringBuilder();
+            AppendArgument(arguments, "zip", zipPath);
+            AppendArgument(arguments, "out", extractionPath);
+            AppendArgument(arguments, "exe", executablePath);
+            AppendArgument(arguments, "pid", Process.GetCurrentProcess().Id.ToString(CultureInfo.InvariantCulture));
+            AppendArgument(arguments, "clear", AutoUpdater.ClearAppDirectory ? "true" : "false");
+            AppendArgument(arguments, "keep", JoinList(AutoUpdater.ClearAppDirectoryIgnoreList));
+            AppendArgument(arguments, "keep-patterns", JoinList(AutoUpdater.ClearAppDirectoryProtectedPatterns));
+            AppendArgument(arguments, "force-close", AutoUpdater.ForceCloseApplication ? "true" : "false");
+            AppendArgument(arguments, "force-close-timeout",
+                ((int) AutoUpdater.ForceCloseTimeout.TotalSeconds).ToString(CultureInfo.InvariantCulture));
+            AppendArgument(arguments, "log", AutoUpdater.ZipExtractorLogPath ?? string.Empty);
+            AppendArgument(arguments, "app-args", BuildHostApplicationArguments());
+            return arguments.ToString();
+        }
+
+        private static string JoinList(IEnumerable<string> values)
+        {
+            return values == null ? string.Empty : string.Join("|", values);
+        }
+
+        /// <summary>
+        ///     Re-quotes the arguments this application was started with so ZipExtractor can hand them back to the updated
+        ///     executable. Each argument is quoted individually because the command line we received has already been split.
+        /// </summary>
+        private static string BuildHostApplicationArguments()
+        {
+            var hostArguments = Environment.GetCommandLineArgs();
+            var rebuilt = new StringBuilder();
+            for (var index = 1; index < hostArguments.Length; index++)
+            {
+                if (rebuilt.Length > 0)
+                {
+                    rebuilt.Append(' ');
+                }
+
+                rebuilt.Append(QuoteIfNeeded(hostArguments[index]));
+            }
+
+            return rebuilt.ToString();
+        }
+
+        private static void AppendArgument(StringBuilder arguments, string name, string value)
+        {
+            if (arguments.Length > 0)
+            {
+                arguments.Append(' ');
+            }
+
+            arguments.Append("--").Append(name).Append('=').Append(Quote(value ?? string.Empty));
+        }
+
+        private static string QuoteIfNeeded(string value)
+        {
+            return value.IndexOfAny(new[] {' ', '\t', '"'}) < 0 ? value : Quote(value);
+        }
+
+        /// <summary>
+        ///     Quotes a value the way CommandLineToArgvW expects it, so a trailing backslash cannot swallow the closing
+        ///     quote and turn "C:\Folder\" into an unterminated argument.
+        /// </summary>
+        private static string Quote(string value)
+        {
+            var quoted = new StringBuilder("\"");
+            for (var index = 0; index < value.Length; index++)
+            {
+                var backslashes = 0;
+                while (index < value.Length && value[index] == '\\')
+                {
+                    backslashes++;
+                    index++;
+                }
+
+                if (index == value.Length)
+                {
+                    quoted.Append('\\', backslashes * 2);
+                    break;
+                }
+
+                if (value[index] == '"')
+                {
+                    quoted.Append('\\', backslashes * 2 + 1);
+                }
+                else
+                {
+                    quoted.Append('\\', backslashes);
+                }
+
+                quoted.Append(value[index]);
+            }
+
+            return quoted.Append('"').ToString();
         }
 
         private static string BytesToString(long byteCount)

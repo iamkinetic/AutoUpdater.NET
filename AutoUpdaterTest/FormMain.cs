@@ -289,12 +289,16 @@ namespace AutoUpdaterTest
                     MessageBoxIcon.Information);
 
                 using var form = new ZipExtractor.FormMain(
-                    zipFilePath: zipPath,
-                    extractionPath: testDir,
-                    executablePath: restartTarget,
-                    clearAppDirectory: true,
-                    clearAppDirectoryIgnoreList: ignoreList,
-                    logFilePath: testLogPath,
+                    new ZipExtractor.CommandLineOptions
+                    {
+                        ZipFilePath = zipPath,
+                        ExtractionPath = testDir,
+                        ExecutablePath = restartTarget,
+                        ClearAppDirectory = true,
+                        IgnoredNames = ignoreList,
+                        ProtectedPatterns = new[] { "*.exe", "*.runtimeconfig.json", "*.deps.json" },
+                        LogFilePath = testLogPath
+                    },
                     exitOnComplete: false);
 
                 form.ShowDialog(this);
