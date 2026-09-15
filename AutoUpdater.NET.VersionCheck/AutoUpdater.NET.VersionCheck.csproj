@@ -1,0 +1,38 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <OutputType>library</OutputType>
+        <TargetFramework>net10.0</TargetFramework>
+        <RootNamespace>AutoUpdaterDotNET.VersionCheck</RootNamespace>
+        <Nullable>disable</Nullable>
+        <ImplicitUsings>disable</ImplicitUsings>
+        <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+        <NoWarn>$(NoWarn);CS1591</NoWarn>
+        <AssemblyTitle>AutoUpdater.NET.VersionCheck</AssemblyTitle>
+        <Company>RBSoft &amp; Cauca</Company>
+        <Product>Cauca.AutoUpdater.VersionCheck</Product>
+        <Version>1.0.0</Version>
+        <AssemblyVersion>1.0.0.0</AssemblyVersion>
+        <FileVersion>1.0.0.0</FileVersion>
+        <PackageVersion>1.0.0</PackageVersion>
+        <NeutralLanguage>en</NeutralLanguage>
+        <PackageId>Cauca.AutoUpdater.VersionCheck</PackageId>
+        <IncludeSymbols>true</IncludeSymbols>
+        <PackageLicenseExpression>MIT</PackageLicenseExpression>
+        <Title>AutoUpdater.NET.VersionCheck</Title>
+        <Authors>rbsoft</Authors>
+        <Description>Side-effect-free read of the AutoUpdater.NET update manifest and version comparison. No user interface dependency.</Description>
+        <PackageProjectUrl>https://github.com/iamkinetic/AutoUpdater.NET</PackageProjectUrl>
+        <PackageOutputPath>build</PackageOutputPath>
+    </PropertyGroup>
+    <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
+        <OutputPath>build\lib</OutputPath>
+        <DebugType>pdbonly</DebugType>
+        <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+        <DocumentationFile>build\lib\AutoUpdater.NET.VersionCheck.xml</DocumentationFile>
+    </PropertyGroup>
+    <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
+        <DebugType>full</DebugType>
+    </PropertyGroup>
+
+</Project>
