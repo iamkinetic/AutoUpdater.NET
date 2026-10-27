@@ -3,7 +3,6 @@ using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
 using System.IO.Compression;
-using System.Runtime.InteropServices;
 using System.Threading;
 using System.Windows.Forms;
 using ZipExtractor.Properties;
@@ -162,7 +161,7 @@ namespace ZipExtractor
                     entry.ExtractToFile(filePath, true);
                     return;
                 }
-                catch (IOException exception) when (IsSharingViolation(exception) && retries < MaxRetries)
+                catch (IOException exception) when (SharingViolation.Matches(exception) && retries < MaxRetries)
                 {
                     retries++;
                     _log.Write($"'{filePath}' is in use{DescribeHolders(filePath)}. " +
@@ -170,14 +169,6 @@ namespace ZipExtractor
                     Thread.Sleep(RetryDelay);
                 }
             }
-        }
-
-        private static bool IsSharingViolation(IOException exception)
-        {
-            const int errorSharingViolation = 0x20;
-            const int errorLockViolation = 0x21;
-            var errorCode = Marshal.GetHRForException(exception) & 0x0000FFFF;
-            return errorCode == errorSharingViolation || errorCode == errorLockViolation;
         }
 
         private string DescribeHolders(string filePath)
