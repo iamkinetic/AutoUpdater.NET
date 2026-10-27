@@ -1,6 +1,9 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
+using System.Diagnostics;
 using System.Linq;
+using System.Threading;
 
 namespace ZipExtractor
 {
@@ -13,32 +16,68 @@ namespace ZipExtractor
     {
         private const int MaximumProbedLibraries = 10;
 
+        private static readonly TimeSpan DefaultWaitTimeout = TimeSpan.FromSeconds(10);
+        private static readonly TimeSpan DefaultPollInterval = TimeSpan.FromMilliseconds(250);
+
         private readonly string _extractionPath;
         private readonly string _executablePath;
         private readonly UpdateLog _log;
+        private readonly TimeSpan _waitTimeout;
+        private readonly TimeSpan _pollInterval;
 
-        public InstallationLockCheck(string extractionPath, string executablePath, UpdateLog log)
+        public InstallationLockCheck(string extractionPath, string executablePath, UpdateLog log,
+            TimeSpan? waitTimeout = null, TimeSpan? pollInterval = null)
         {
             _extractionPath = extractionPath;
             _executablePath = executablePath;
             _log = log;
+            _waitTimeout = waitTimeout ?? DefaultWaitTimeout;
+            _pollInterval = pollInterval ?? DefaultPollInterval;
         }
 
         public bool TryVerifyWritable(out string failureReason)
         {
             failureReason = null;
 
-            foreach (var filePath in GetProbedFiles())
+            var lockedFiles = GetProbedFiles().Where(IsLocked).ToList();
+            if (lockedFiles.Count > 0 && !TryWaitForRelease(lockedFiles))
             {
-                if (IsLocked(filePath))
-                {
-                    failureReason = $"'{Path.GetFileName(filePath)}' is still in use{DescribeHolders(filePath)}";
-                    return false;
-                }
+                var filePath = lockedFiles[0];
+                failureReason = $"'{Path.GetFileName(filePath)}' is still in use{DescribeHolders(filePath)}";
+                return false;
             }
 
             _log.Write("Installation directory is writable.");
             return true;
+        }
+
+        /// <summary>
+        ///     A Windows service (indexing, antivirus, shell extensions) can hold the just-exited executable for a moment, and
+        ///     aborting on that blip relaunches the old application, which restarts the whole update.
+        /// </summary>
+        private bool TryWaitForRelease(List<string> lockedFiles)
+        {
+            _log.Write($"'{Path.GetFileName(lockedFiles[0])}' is in use{DescribeHolders(lockedFiles[0])}. " +
+                       $"Waiting up to {_waitTimeout.TotalSeconds:0.#} s for it to be released...");
+
+            var stopwatch = Stopwatch.StartNew();
+            while (true)
+            {
+                lockedFiles.RemoveAll(filePath => !IsLocked(filePath));
+                if (lockedFiles.Count == 0)
+                {
+                    _log.Write($"Locked files were released after {stopwatch.Elapsed.TotalSeconds:0.0} s.");
+                    return true;
+                }
+
+                if (stopwatch.Elapsed >= _waitTimeout)
+                {
+                    _log.Write($"Files are still locked after {stopwatch.Elapsed.TotalSeconds:0.0} s.");
+                    return false;
+                }
+
+                Thread.Sleep(_pollInterval);
+            }
         }
 
         /// <summary>
