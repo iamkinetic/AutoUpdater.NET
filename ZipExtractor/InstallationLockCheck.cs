@@ -1,7 +1,7 @@
 using System;
-using System.Collections.Generic;
-using System.IO;
 using System.Diagnostics;
+using System.Globalization;
+using System.IO;
 using System.Linq;
 using System.Threading;
 
@@ -39,11 +39,15 @@ namespace ZipExtractor
         {
             failureReason = null;
 
-            var lockedFiles = GetProbedFiles().Where(IsLocked).ToList();
-            if (lockedFiles.Count > 0 && !TryWaitForRelease(lockedFiles))
+            var lockedFile = FindLockedFile();
+            if (lockedFile != null)
             {
-                var filePath = lockedFiles[0];
-                failureReason = $"'{Path.GetFileName(filePath)}' is still in use{DescribeHolders(filePath)}";
+                lockedFile = WaitForRelease(lockedFile);
+            }
+
+            if (lockedFile != null)
+            {
+                failureReason = $"'{Path.GetFileName(lockedFile)}' is still in use{DescribeHolders(lockedFile)}";
                 return false;
             }
 
@@ -51,33 +55,44 @@ namespace ZipExtractor
             return true;
         }
 
+        private string FindLockedFile()
+        {
+            return GetProbedFiles().FirstOrDefault(IsLocked);
+        }
+
         /// <summary>
         ///     A Windows service (indexing, antivirus, shell extensions) can hold the just-exited executable for a moment, and
         ///     aborting on that blip relaunches the old application, which restarts the whole update.
         /// </summary>
-        private bool TryWaitForRelease(List<string> lockedFiles)
+        /// <returns>The first file still locked by the last sweep, or null once a whole sweep finds nothing locked.</returns>
+        private string WaitForRelease(string lockedFile)
         {
-            _log.Write($"'{Path.GetFileName(lockedFiles[0])}' is in use{DescribeHolders(lockedFiles[0])}. " +
-                       $"Waiting up to {_waitTimeout.TotalSeconds:0.#} s for it to be released...");
+            _log.Write($"'{Path.GetFileName(lockedFile)}' is in use{DescribeHolders(lockedFile)}. " +
+                       $"Waiting up to {FormatSeconds(_waitTimeout, "0.#")} s for it to be released...");
 
             var stopwatch = Stopwatch.StartNew();
             while (true)
             {
-                lockedFiles.RemoveAll(filePath => !IsLocked(filePath));
-                if (lockedFiles.Count == 0)
+                Thread.Sleep(_pollInterval);
+
+                lockedFile = FindLockedFile();
+                if (lockedFile == null)
                 {
-                    _log.Write($"Locked files were released after {stopwatch.Elapsed.TotalSeconds:0.0} s.");
-                    return true;
+                    _log.Write($"Locked files were released after {FormatSeconds(stopwatch.Elapsed, "0.0")} s.");
+                    return null;
                 }
 
                 if (stopwatch.Elapsed >= _waitTimeout)
                 {
-                    _log.Write($"Files are still locked after {stopwatch.Elapsed.TotalSeconds:0.0} s.");
-                    return false;
+                    _log.Write($"Files are still locked after {FormatSeconds(stopwatch.Elapsed, "0.0")} s.");
+                    return lockedFile;
                 }
-
-                Thread.Sleep(_pollInterval);
             }
+        }
+
+        private static string FormatSeconds(TimeSpan duration, string format)
+        {
+            return duration.TotalSeconds.ToString(format, CultureInfo.InvariantCulture);
         }
 
         /// <summary>
@@ -116,9 +131,14 @@ namespace ZipExtractor
                     return false;
                 }
             }
-            catch (IOException)
+            catch (IOException exception) when (SharingViolation.IsSharingViolation(exception))
             {
                 return true;
+            }
+            catch (IOException exception)
+            {
+                _log.WriteException($"Cannot open '{Path.GetFileName(filePath)}' for writing", exception);
+                return false;
             }
             catch (UnauthorizedAccessException exception)
             {

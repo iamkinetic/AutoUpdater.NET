@@ -40,8 +40,11 @@
       <PackageReference Include="semver" Version="2.3.0" />
     </ItemGroup>
 
-    <Target Name="PublishZipExtractor" BeforeTargets="BeforeBuild" Condition=" '$(Configuration)' == 'Release' ">
+    <!-- Runs once, before the per-framework builds, because they all embed the same Resources\ZipExtractor.exe. The
+         single-file publish skips an output newer than its inputs, so the old executable is deleted first. -->
+    <Target Name="PublishZipExtractor" BeforeTargets="DispatchToInnerBuilds" Condition=" '$(Configuration)' == 'Release' ">
         <Message Text="Publishing ZipExtractor to Resources..." Importance="High" />
-        <Exec Command="dotnet publish &quot;$(MSBuildThisFileDirectory)..\ZipExtractor\ZipExtractor.csproj&quot; --configuration Release --framework $(TargetFramework) -r win-x86 /p:SelfContained=false /p:PublishSingleFile=true /p:IncludeNativeLibrariesForSelfExtract=true --output &quot;$(MSBuildThisFileDirectory)Resources&quot;" />
+        <Delete Files="$(MSBuildThisFileDirectory)Resources\ZipExtractor.exe" />
+        <Exec Command="dotnet publish &quot;$(MSBuildThisFileDirectory)..\ZipExtractor\ZipExtractor.csproj&quot; --configuration Release --framework net10.0-windows -r win-x86 /p:SelfContained=false /p:PublishSingleFile=true /p:IncludeNativeLibrariesForSelfExtract=true --output &quot;$(MSBuildThisFileDirectory)Resources&quot;" />
     </Target>
 </Project>
