@@ -131,7 +131,7 @@ namespace ZipExtractor
                     return false;
                 }
             }
-            catch (IOException exception) when (SharingViolation.IsSharingViolation(exception))
+            catch (IOException exception) when (SharingViolation.Matches(exception))
             {
                 return true;
             }

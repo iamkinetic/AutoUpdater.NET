@@ -72,9 +72,9 @@ public class InstallationLockCheckTests
     }
 
     [Test]
-    public void ProbedFileDeletedDuringWait_TryVerifyWritable_ReturnsTrueWithoutWaitingForTheTimeout()
+    public void ProbedFileReleasedThenDeletedDuringWait_TryVerifyWritable_ReturnsTrueWithoutWaitingForTheTimeout()
     {
-        var holder = new FileStream(_executablePath, FileMode.Open, FileAccess.ReadWrite, FileShare.Delete);
+        var holder = new FileStream(_executablePath, FileMode.Open, FileAccess.ReadWrite, FileShare.None);
         var timeout = TimeSpan.FromSeconds(10);
         var check = CreateCheck(timeout);
         var stopwatch = Stopwatch.StartNew();

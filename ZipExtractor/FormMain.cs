@@ -161,7 +161,7 @@ namespace ZipExtractor
                     entry.ExtractToFile(filePath, true);
                     return;
                 }
-                catch (IOException exception) when (SharingViolation.IsSharingViolation(exception) && retries < MaxRetries)
+                catch (IOException exception) when (SharingViolation.Matches(exception) && retries < MaxRetries)
                 {
                     retries++;
                     _log.Write($"'{filePath}' is in use{DescribeHolders(filePath)}. " +
